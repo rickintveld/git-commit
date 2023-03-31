@@ -42,10 +42,7 @@ fn main() {
 
         match confirm_new_commit {
             Ok(true) => println!("{}", "> Ok great!".green()),
-            Ok(false) => {
-                println!("{}", "> Ok sure, process will be terminated.".blue());
-                break;
-            }
+            Ok(false) => break,
             Err(_) => {
                 println!("{}", "> Error, try again later.".red());
                 break;
