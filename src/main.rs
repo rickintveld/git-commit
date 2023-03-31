@@ -1,6 +1,11 @@
 use colored::Colorize;
 use inquire::{MultiSelect, Text};
-use std::{env, fs, process::Command, str};
+use std::{
+    env, fs,
+    io::{Read, Write},
+    process::{Command, Stdio},
+    str,
+};
 
 fn main() {
     let has_git: bool = is_git_repository();
@@ -23,6 +28,9 @@ fn main() {
 
     stage_files();
     commit();
+
+    // @todo while loop to ask for another commit
+    // @todo ask to execute git push
 }
 
 fn is_git_repository() -> bool {
@@ -44,16 +52,32 @@ fn is_git_repository() -> bool {
 }
 
 fn stage_files() {
-    let output = Command::new("git")
-        .current_dir(env::current_dir().unwrap())
-        .arg("diff")
-        .arg("--name-only")
-        .output()
+    let mut cmd_git_status = Command::new("git")
+        .args(["status", "-s"])
+        .stdout(Stdio::piped())
+        .spawn()
         .unwrap();
+
+    let mut cmd_cut = Command::new("cut")
+        .arg("-c4-")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .unwrap();
+
+    if let Some(ref mut stdout) = cmd_git_status.stdout {
+        if let Some(ref mut stdin) = cmd_cut.stdin {
+            let mut buf: Vec<u8> = Vec::new();
+            stdout.read_to_end(&mut buf).unwrap();
+            stdin.write_all(&buf).unwrap();
+        }
+    }
+
+    let output = cmd_cut.wait_with_output().unwrap().stdout;
 
     let mut stdout = String::new();
 
-    stdout.push_str(match str::from_utf8(&output.stdout) {
+    stdout.push_str(match str::from_utf8(&output) {
         Ok(files) => files,
         Err(_) => panic!("No changed git files found!"),
     });
