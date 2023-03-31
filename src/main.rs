@@ -26,7 +26,6 @@ fn main() {
 
     println!("{}", ansi_art);
 
-    let mut new_commit = true;
     let mut iterator: u32 = 0;
 
     loop {
@@ -34,14 +33,25 @@ fn main() {
             println!("{}", "> Would you like to commit some more?".green());
         }
 
-        if !new_commit {
-            break;
-        }
-
         stage_files();
         commit();
 
-        new_commit = false;
+        let confirm_new_commit = Confirm::new("Do you want to commit some more?")
+            .with_default(false)
+            .prompt();
+
+        match confirm_new_commit {
+            Ok(true) => println!("{}", "> Ok great!".green()),
+            Ok(false) => {
+                println!("{}", "> Ok sure, process will be terminated.".blue());
+                break;
+            }
+            Err(_) => {
+                println!("{}", "> Error, try again later.".red());
+                break;
+            }
+        }
+
         iterator += 1;
     }
 
@@ -100,7 +110,7 @@ fn stage_files() {
     });
 
     let options: Vec<&str> = stdout.split("\n").collect();
-    let selection = MultiSelect::new("Select the files you want to commit:", options).prompt();
+    let selection = MultiSelect::new("Select the files you want to commit: ", options).prompt();
     let files = selection.unwrap();
 
     for file in files {
@@ -125,7 +135,7 @@ fn commit() {
 }
 
 fn commit_message() -> String {
-    let message_input = Text::new("Enter commit message").prompt();
+    let message_input = Text::new("Enter commit message: ").prompt();
     let message = message_input.unwrap();
 
     message
