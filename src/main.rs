@@ -26,14 +26,28 @@ fn main() {
 
     println!("{}", ansi_art);
 
-    stage_files();
-    commit();
+    let mut new_commit = true;
+    let mut iterator: u32 = 0;
 
-    println!("{}", "The selected files are committed".green());
-    println!("{}", "Would you like to commit some more?".green());
+    loop {
+        if 0 < iterator {
+            println!("{}", "> Would you like to commit some more?".green());
+        }
 
-    // @todo while loop to ask for another commit
-    // @todo ask to execute git push
+        if !new_commit {
+            break;
+        }
+
+        stage_files();
+        commit();
+
+        new_commit = false;
+        iterator += 1;
+    }
+
+    let _ = git_push();
+
+    // @todo clean up and refactor
 }
 
 fn is_git_repository() -> bool {
@@ -86,9 +100,7 @@ fn stage_files() {
     });
 
     let options: Vec<&str> = stdout.split("\n").collect();
-
     let selection = MultiSelect::new("Select the files you want to commit:", options).prompt();
-
     let files = selection.unwrap();
 
     for file in files {
@@ -108,6 +120,8 @@ fn commit() {
         .args(["commit", "-m", message.as_str()])
         .output()
         .expect(format!("{}", "Failed to commit these files".red()).as_str());
+
+    println!("{}", "> The selected files are committed".green());
 }
 
 fn commit_message() -> String {
@@ -115,4 +129,12 @@ fn commit_message() -> String {
     let message = message_input.unwrap();
 
     message
+}
+
+fn git_push() {
+    Command::new("git")
+        .current_dir(env::current_dir().unwrap())
+        .arg("push")
+        .output()
+        .expect(format!("{}", "Failed to push these commits".red()).as_str());
 }
