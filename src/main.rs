@@ -137,13 +137,13 @@ fn git_push() {
         .prompt();
 
     match confirm_push {
-        Ok(true) => println!("Ok great!"),
+        Ok(true) => println!("{}", "> Ok great!".green()),
         Ok(false) => {
-            println!("Ok sure, process will be terminated.");
+            println!("{}", "> Ok sure, process will be terminated.".blue());
             std::process::exit(0);
         }
         Err(_) => {
-            println!("Error with the confirmation, try again later.");
+            println!("{}", "> Error, try again later.".red());
             std::process::exit(0);
         }
     }
