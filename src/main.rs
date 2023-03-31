@@ -137,4 +137,6 @@ fn git_push() {
         .arg("push")
         .output()
         .expect(format!("{}", "Failed to push these commits".red()).as_str());
+
+    println!("{}", "> The commits are pushed!".green());
 }
