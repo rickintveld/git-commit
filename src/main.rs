@@ -29,6 +29,9 @@ fn main() {
     stage_files();
     commit();
 
+    println!("{}", "The selected files are committed".green());
+    println!("{}", "Would you like to commit some more?".green());
+
     // @todo while loop to ask for another commit
     // @todo ask to execute git push
 }
