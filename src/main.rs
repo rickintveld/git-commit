@@ -1,5 +1,5 @@
 use colored::Colorize;
-use inquire::{MultiSelect, Text};
+use inquire::{Confirm, MultiSelect, Text};
 use std::{
     env, fs,
     io::{Read, Write},
@@ -132,6 +132,22 @@ fn commit_message() -> String {
 }
 
 fn git_push() {
+    let confirm_push = Confirm::new("Do you want to push the commits?")
+        .with_default(false)
+        .prompt();
+
+    match confirm_push {
+        Ok(true) => println!("Ok great!"),
+        Ok(false) => {
+            println!("Ok sure, process will be terminated.");
+            std::process::exit(0);
+        }
+        Err(_) => {
+            println!("Error with the confirmation, try again later.");
+            std::process::exit(0);
+        }
+    }
+
     Command::new("git")
         .current_dir(env::current_dir().unwrap())
         .arg("push")
